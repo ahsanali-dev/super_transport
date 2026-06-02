@@ -14,11 +14,68 @@ import {
   ShieldCheck, 
   ArrowRight,
   MessageSquare,
-  FileCheck
+  FileCheck,
+  Menu,
+  X
 } from "lucide-react";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<string>("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+
+  // Quick Inquiry Form States
+  const [inquiryName, setInquiryName] = useState("");
+  const [inquiryPhone, setInquiryPhone] = useState("");
+  const [inquiryEmail, setInquiryEmail] = useState("");
+  const [inquiryMethod, setInquiryMethod] = useState("phone");
+  const [inquiryMessage, setInquiryMessage] = useState("");
+  const [inquiryLoading, setInquiryLoading] = useState(false);
+  const [inquiryStatus, setInquiryStatus] = useState<{ type: "success" | "error" | null, message: string }>({ type: null, message: "" });
+
+  const handleInquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInquiryLoading(true);
+    setInquiryStatus({ type: null, message: "" });
+
+    try {
+      const response = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: inquiryName,
+          phone: inquiryPhone,
+          email: inquiryEmail,
+          method: inquiryMethod,
+          message: inquiryMessage,
+        }),
+      });
+
+      if (response.ok) {
+        setInquiryStatus({
+          type: "success",
+          message: "Thank you! Your inquiry has been sent. We will contact you soon.",
+        });
+        setInquiryName("");
+        setInquiryPhone("");
+        setInquiryEmail("");
+        setInquiryMessage("");
+      } else {
+        const data = await response.json();
+        setInquiryStatus({
+          type: "error",
+          message: data.error || "Failed to send inquiry. Please try again.",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setInquiryStatus({
+        type: "error",
+        message: "A network error occurred. Please try again later.",
+      });
+    } finally {
+      setInquiryLoading(false);
+    }
+  };
 
   useEffect(() => {
     const sections = ["about", "operators", "policy", "shops", "contact"];
@@ -119,10 +176,10 @@ export default function Home() {
             </a>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <Link
               href="/admin"
-              className="text-xs text-slate-400 hover:text-gold transition-colors duration-200 hidden sm:inline-block"
+              className="text-xs text-slate-400 hover:text-gold transition-colors duration-200"
             >
               Admin Portal
             </Link>
@@ -133,7 +190,74 @@ export default function Home() {
               Apply Now
             </Link>
           </div>
+
+          {/* Hamburger Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="rounded-lg p-2 text-slate-400 hover:bg-brand-card hover:text-gold md:hidden transition-colors"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-brand-border bg-brand-dark/98 px-6 py-6 transition-all duration-300 animate-in slide-in-from-top-5">
+            <nav className="flex flex-col gap-5 text-base font-semibold">
+              <a 
+                href="#about" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`transition-colors py-1 ${activeSection === "about" ? "text-gold" : "text-slate-300 hover:text-gold"}`}
+              >
+                About
+              </a>
+              <a 
+                href="#operators" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`transition-colors py-1 ${activeSection === "operators" ? "text-gold" : "text-slate-300 hover:text-gold"}`}
+              >
+                Operators
+              </a>
+              <a 
+                href="#shops" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`transition-colors py-1 ${activeSection === "shops" ? "text-gold" : "text-slate-300 hover:text-gold"}`}
+              >
+                Shops
+              </a>
+              <a 
+                href="#policy" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`transition-colors py-1 ${activeSection === "policy" ? "text-gold" : "text-slate-300 hover:text-gold"}`}
+              >
+                Policy
+              </a>
+              <a 
+                href="#contact" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`transition-colors py-1 ${activeSection === "contact" ? "text-gold" : "text-slate-300 hover:text-gold"}`}
+              >
+                Contact
+              </a>
+              <div className="h-px bg-brand-border my-2" />
+              <Link
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-slate-400 hover:text-gold py-1 text-sm"
+              >
+                Admin Portal
+              </Link>
+              <Link
+                href="/apply"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-xl bg-gold py-3 text-center text-sm font-bold text-brand-dark hover:bg-gold-hover transition-colors shadow-md mt-2"
+              >
+                Apply Now
+              </Link>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Hero / About Section */}
@@ -364,13 +488,15 @@ export default function Home() {
           </div>
 
           <div className="rounded-2xl border border-brand-border bg-brand-card p-8">
-            <form className="space-y-6">
+            <form onSubmit={handleInquirySubmit} className="space-y-6">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="name" className="text-xs font-semibold text-slate-400">Full Name</label>
                   <input
                     type="text"
                     id="name"
+                    value={inquiryName}
+                    onChange={(e) => setInquiryName(e.target.value)}
                     className="w-full rounded-lg border border-brand-border bg-brand-dark px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:border-gold focus:outline-none"
                     placeholder="John Doe"
                     required
@@ -381,6 +507,8 @@ export default function Home() {
                   <input
                     type="tel"
                     id="phone"
+                    value={inquiryPhone}
+                    onChange={(e) => setInquiryPhone(e.target.value)}
                     className="w-full rounded-lg border border-brand-border bg-brand-dark px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:border-gold focus:outline-none"
                     placeholder="(833) 337-8737"
                     required
@@ -393,6 +521,8 @@ export default function Home() {
                 <input
                   type="email"
                   id="email"
+                  value={inquiryEmail}
+                  onChange={(e) => setInquiryEmail(e.target.value)}
                   className="w-full rounded-lg border border-brand-border bg-brand-dark px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:border-gold focus:outline-none"
                   placeholder="email@example.com"
                   required
@@ -403,15 +533,36 @@ export default function Home() {
                 <label className="text-xs font-semibold text-slate-400 block mb-1">Preferred Connection Method</label>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                    <input type="radio" name="contact-method" value="phone" defaultChecked className="accent-gold" />
+                    <input 
+                      type="radio" 
+                      name="contact-method" 
+                      value="phone" 
+                      checked={inquiryMethod === "phone"} 
+                      onChange={() => setInquiryMethod("phone")}
+                      className="accent-gold" 
+                    />
                     Phone Call
                   </label>
                   <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                    <input type="radio" name="contact-method" value="text" className="accent-gold" />
+                    <input 
+                      type="radio" 
+                      name="contact-method" 
+                      value="text" 
+                      checked={inquiryMethod === "text"} 
+                      onChange={() => setInquiryMethod("text")}
+                      className="accent-gold" 
+                    />
                     Text Message
                   </label>
                   <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                    <input type="radio" name="contact-method" value="email" className="accent-gold" />
+                    <input 
+                      type="radio" 
+                      name="contact-method" 
+                      value="email" 
+                      checked={inquiryMethod === "email"} 
+                      onChange={() => setInquiryMethod("email")}
+                      className="accent-gold" 
+                    />
                     Email
                   </label>
                 </div>
@@ -422,17 +573,30 @@ export default function Home() {
                 <textarea
                   id="message"
                   rows={4}
+                  value={inquiryMessage}
+                  onChange={(e) => setInquiryMessage(e.target.value)}
                   className="w-full rounded-lg border border-brand-border bg-brand-dark px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:border-gold focus:outline-none resize-none"
                   placeholder="I am interested in leased-on programs. Do you have run lanes in Georgia?"
                   required
                 ></textarea>
               </div>
 
+              {inquiryStatus.type && (
+                <p className={`text-xs font-bold text-center p-2.5 rounded-lg border ${
+                  inquiryStatus.type === "success" 
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+                    : "bg-red-500/10 text-red-400 border-red-500/20"
+                }`}>
+                  {inquiryStatus.message}
+                </p>
+              )}
+
               <button
                 type="submit"
-                className="w-full rounded-full bg-gold py-3.5 text-sm font-extrabold text-brand-dark hover:bg-gold-hover transition-colors duration-200"
+                disabled={inquiryLoading}
+                className="w-full rounded-full bg-gold py-3.5 text-sm font-extrabold text-brand-dark hover:bg-gold-hover transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Send Inquiry
+                {inquiryLoading ? "Sending Inquiry..." : "Send Inquiry"}
               </button>
             </form>
           </div>

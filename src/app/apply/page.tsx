@@ -724,7 +724,7 @@ export default function ApplyPage() {
                 </div>
                 
                 {/* Visual Tracker Dots */}
-                <div className="flex items-center justify-between gap-1 overflow-x-auto py-1">
+                <div className="hidden sm:flex items-center justify-between gap-1 overflow-x-auto py-1">
                   {STEPS.map((step) => {
                     const isActive = currentStep >= step.id;
                     const isCurrent = currentStep === step.id;
@@ -753,6 +753,20 @@ export default function ApplyPage() {
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Mobile Progress Bar */}
+                <div className="block sm:hidden space-y-2 mt-2">
+                  <div className="w-full bg-brand-border h-2 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-gold h-full rounded-full transition-all duration-300"
+                      style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-500 font-bold">
+                    <span>PROGRESS</span>
+                    <span>{Math.round((currentStep / STEPS.length) * 100)}%</span>
+                  </div>
                 </div>
               </div>
 
@@ -863,7 +877,7 @@ export default function ApplyPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="space-y-1">
                           <label className="text-xs font-bold text-slate-400">City *</label>
                           <input
@@ -965,7 +979,7 @@ export default function ApplyPage() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-400">City *</label>
                             <input

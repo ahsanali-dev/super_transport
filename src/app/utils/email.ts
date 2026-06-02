@@ -410,3 +410,88 @@ export async function sendApplicationStatusEmail(
     return { success: false, error: err.message };
   }
 }
+
+export async function sendInquiryEmail(details: {
+  name: string;
+  phone: string;
+  email: string;
+  method: string;
+  message: string;
+}) {
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT || '587');
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  const secure = process.env.SMTP_SECURE === 'true';
+  const from = process.env.EMAIL_FROM || 'info@mysupertransport.com';
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'info@mysupertransport.com';
+
+  if (!host || !user || !pass) {
+    console.warn('SMTP configuration is missing. Skipping email notifications.');
+    return { success: false, error: 'SMTP config missing' };
+  }
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: {
+      user,
+      pass,
+    },
+  });
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff; color: #1e293b;">
+      <div style="background-color: #0b0f19; padding: 20px; border-radius: 6px 6px 0 0; text-align: center;">
+        <h1 style="color: #d4af37; margin: 0; font-size: 24px; letter-spacing: 1px;">SUPERTRANSPORT</h1>
+        <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Quick Inquiry</p>
+      </div>
+      <div style="padding: 20px; line-height: 1.6;">
+        <h2 style="color: #0b0f19; margin-top: 0; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px;">New Contact/Inquiry Received</h2>
+        <p>A new quick inquiry has been submitted from the SuperTransport landing page. Details are below:</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 13px;">
+          <tr>
+            <td style="padding: 6px 0; font-weight: bold; width: 35%;">Name:</td>
+            <td style="padding: 6px 0;">${details.name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-weight: bold;">Phone Number:</td>
+            <td style="padding: 6px 0;">${details.phone}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-weight: bold;">Email:</td>
+            <td style="padding: 6px 0;">${details.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-weight: bold;">Preferred Contact:</td>
+            <td style="padding: 6px 0; text-transform: uppercase; font-weight: bold; color: #d4af37;">${details.method}</td>
+          </tr>
+        </table>
+        
+        <h3 style="color: #0b0f19; margin-top: 20px; font-size: 14px;">Questions/Message:</h3>
+        <div style="background-color: #f8fafc; padding: 12px; border-radius: 6px; font-size: 13px; color: #334155; border: 1px solid #e2e8f0; font-style: italic; white-space: pre-wrap;">
+          ${details.message}
+        </div>
+      </div>
+      <div style="background-color: #f8fafc; padding: 15px; border-radius: 0 0 6px 6px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
+        SUPERTRANSPORT | 605 Madison St, Pleasant Hill, MO 64080 | DOT# 2309365 | MC# 788425
+      </div>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: adminEmail,
+      subject: `[Quick Inquiry] ${details.name} - Prefers ${details.method}`,
+      html: htmlContent,
+      replyTo: details.email
+    });
+    return { success: true };
+  } catch (err: any) {
+    console.error('Failed to send inquiry SMTP email:', err);
+    return { success: false, error: err.message };
+  }
+}

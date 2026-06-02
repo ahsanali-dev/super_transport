@@ -18,7 +18,8 @@ import {
   Eye,
   EyeOff,
   Download,
-  Calendar
+  Calendar,
+  ArrowLeft
 } from "lucide-react";
 
 interface EmploymentHistoryItem {
@@ -98,6 +99,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [applications, setApplications] = useState<DriverApplication[]>([]);
   const [selectedApp, setSelectedApp] = useState<DriverApplication | null>(null);
+  const [mobileActiveView, setMobileActiveView] = useState<"list" | "detail">("list");
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("");
@@ -393,7 +395,7 @@ export default function AdminPage() {
       {/* Main Dashboard Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Column: Applications List */}
-        <aside className="w-80 border-r border-slate-800 bg-[#0F1524] flex flex-col shrink-0">
+        <aside className={`w-full md:w-80 border-r border-slate-800 bg-[#0F1524] flex flex-col shrink-0 ${selectedApp && mobileActiveView === "detail" ? "hidden md:flex" : "flex"}`}>
           {/* Search & Filters */}
           <div className="p-4 border-b border-slate-800 space-y-3">
             <div className="relative">
@@ -437,6 +439,7 @@ export default function AdminPage() {
                   onClick={() => {
                     setSelectedApp(app);
                     setRevealSSN(false);
+                    setMobileActiveView("detail");
                   }}
                   className={`w-full p-4 text-left transition-all flex flex-col gap-1.5 border-l-4 ${selectedApp?.id === app.id
                       ? "bg-[#161D2B]/90 border-amber-500"
@@ -475,9 +478,16 @@ export default function AdminPage() {
         </aside>
 
         {/* Right Column: Submission Details View */}
-        <main className="flex-1 overflow-y-auto bg-[#070A12] p-8">
+        <main className={`flex-1 overflow-y-auto bg-[#070A12] p-4 md:p-8 ${!selectedApp || mobileActiveView === "list" ? "hidden md:block" : "block"}`}>
           {selectedApp ? (
             <div className="max-w-4xl mx-auto space-y-6">
+              {/* Back to List for Mobile */}
+              <button
+                onClick={() => setMobileActiveView("list")}
+                className="flex md:hidden items-center gap-1 text-xs font-bold text-slate-400 hover:text-gold mb-4 bg-[#161D2B] px-4 py-2.5 rounded-lg border border-slate-800 shadow-sm w-fit"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to Applicant List
+              </button>
               {/* Header Action Sheet */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#161D2B] p-6 rounded-2xl border border-slate-800 shadow-md">
                 <div>
