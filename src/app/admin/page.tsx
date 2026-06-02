@@ -95,6 +95,7 @@ interface DriverApplication {
   status: string;
 }
 
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [applications, setApplications] = useState<DriverApplication[]>([]);
@@ -210,9 +211,9 @@ export default function AdminPage() {
     }
   };
 
-  // Helper to render documents (PDF vs Image)
-  const renderDocPreview = (dataUrl: string | null, label: string) => {
-    if (!dataUrl) {
+  // Helper to render documents — handles direct URLs (Supabase) and legacy Base64
+  const renderDocPreview = (docValue: string | null, label: string) => {
+    if (!docValue) {
       return (
         <div className="flex flex-col items-center justify-center p-6 border border-dashed border-slate-700 bg-[#0B0F19]/40 rounded-xl text-xs text-slate-500">
           No {label} uploaded.
@@ -220,7 +221,21 @@ export default function AdminPage() {
       );
     }
 
-    const isPdf = dataUrl.startsWith("data:application/pdf");
+    // Normalize value → always a usable src
+    // Case 1: Base64  → use as-is
+    // Case 2: full https URL → use as-is
+    // Case 3: legacy storage path (e.g. "uuid/john/dl-front.jpg") → build Supabase URL
+    let src = docValue;
+    if (!docValue.startsWith("data:") && !docValue.startsWith("http")) {
+      const SUPABASE_URL = "https://jecympxettyntszbiomc.supabase.co";
+      src = `${SUPABASE_URL}/storage/v1/object/public/driver-documents/${docValue}`;
+    }
+
+    const isPdf =
+      src.startsWith("data:application/pdf") ||
+      src.toLowerCase().includes(".pdf");
+
+    const isExternal = src.startsWith("http");
 
     if (isPdf) {
       return (
@@ -234,14 +249,15 @@ export default function AdminPage() {
               </div>
             </div>
             <a
-              href={dataUrl}
-              download={`${label.replace(/\s+/g, '_')}.pdf`}
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-slate-950 transition flex items-center gap-1 text-[11px] font-bold"
             >
-              <Download className="h-3.5 w-3.5" /> Download
+              <Download className="h-3.5 w-3.5" /> Open / Download
             </a>
           </div>
-          <iframe src={dataUrl} className="w-full h-[220px] rounded-lg border border-slate-700 bg-slate-800" />
+          <iframe src={src} className="w-full h-[220px] rounded-lg border border-slate-700 bg-slate-800" />
         </div>
       );
     }
@@ -251,19 +267,17 @@ export default function AdminPage() {
         <div className="flex justify-between items-center text-xs text-slate-400">
           <span className="font-semibold">{label}</span>
           <a
-            href={dataUrl}
-            download={`${label.replace(/\s+/g, '_')}.png`}
+            href={src}
+            target={isExternal ? "_blank" : undefined}
+            rel={isExternal ? "noopener noreferrer" : undefined}
+            download={isExternal ? undefined : `${label.replace(/\s+/g, '_')}.jpg`}
             className="text-[10px] text-amber-500 underline flex items-center gap-0.5"
           >
-            Download Image
+            {isExternal ? "Open Full Size \u2197" : "Download Image"}
           </a>
         </div>
         <div className="rounded-xl border border-slate-700 bg-slate-900 overflow-hidden flex items-center justify-center h-[220px]">
-          <img
-            src={dataUrl}
-            alt={label}
-            className="max-h-full max-w-full object-contain"
-          />
+          <img src={src} alt={label} className="max-h-full max-w-full object-contain" />
         </div>
       </div>
     );
@@ -818,7 +832,11 @@ export default function AdminPage() {
                       <div className="rounded-xl border border-slate-800 bg-white p-4 flex items-center justify-center h-[180px]">
                         {selectedApp.signatureData ? (
                           <img
-                            src={selectedApp.signatureData}
+                            src={
+                              selectedApp.signatureData.startsWith("data:") || selectedApp.signatureData.startsWith("http")
+                                ? selectedApp.signatureData
+                                : `https://jecympxettyntszbiomc.supabase.co/storage/v1/object/public/driver-documents/${selectedApp.signatureData}`
+                            }
                             alt="Driver Signature"
                             className="max-h-[140px] max-w-full object-contain filter invert"
                           />
