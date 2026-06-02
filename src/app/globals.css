@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #D4AF37;
+  --color-gold-hover: #C59F2D;
+  --color-gold-light: #F3E5AB;
+  --color-brand-dark: #0B0F19;
+  --color-brand-card: #151D2A;
+  --color-brand-border: #1E293B;
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --background: #0B0F19;
+  --foreground: #F8FAFC;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0F19;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}
+
+/* Micro-animations and hover helpers */
+.hover-gold-glow:hover {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s ease;
+}
+
+.premium-gradient {
+  background: linear-gradient(135deg, #0B0F19 0%, #151D2A 100%);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #F3E5AB 0%, #D4AF37 50%, #B8860B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model DriverApplication {
+  id                   String   @id @default(uuid())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  // Personal Info
+  firstName            String
+  lastName             String
+  email                String
+  phone                String
+  dob                  String
+  addressStreet        String
+  addressLine2         String?
+  addressCity          String
+  addressState         String
+  addressZip           String
+  addressDuration      String?  // "Less than 3 years" or "3 years or more"
+  
+  // Previous Address (if current address is < 3 years)
+  prevAddressStreet    String?
+  prevAddressLine2     String?
+  prevAddressCity      String?
+  prevAddressState     String?
+  prevAddressZip       String?
+  
+  // CDL & Experience
+  cdlNumber            String
+  cdlState             String
+  cdlClass             String
+  cdlExpiration        String?
+  endorsements         String?  // Comma-separated list of checked endorsements
+  cdlTenYears          Boolean  @default(false)
+  referral             String?
+  
+  // Employment history check
+  employmentHistory    String?  @db.Text // Serialized JSON string of the 10-year employment history
+  employmentGaps       Boolean  @default(false)
+  gapsDetail            String?  @db.Text
+  
+  yearsExperience      String
+  equipmentOperated    String // Comma separated list of equipment types
+  
+  // Accidents & Violations
+  hasAccidents         Boolean  @default(false)
+  accidentsDetail      String?  @db.Text
+  hasViolations        Boolean  @default(false)
+  violationsDetail     String?  @db.Text
+  
+  // Drug & Alcohol
+  sapStatus            Boolean  @default(false) // "Are you currently participating in a DOT Return-to-Duty or SAP process?"
+  
+  // Document Uploads (Base64 strings)
+  docDlFront           String?  @db.Text
+  docDlBack            String?  @db.Text
+  docMedCert           String?  @db.Text
+  
+  // Disclosures & Questions
+  fcraConsent          Boolean  @default(false)
+  pspConsent           Boolean  @default(false)
+  clearinghouseConsent Boolean  @default(false)
+  drugTestPositive     Boolean  @default(false)
+  drugTestDoc          Boolean  @default(false)
+  companyPolicyConsent Boolean  @default(false)
+  
+  // Signature & Consent
+  ssn                  String?
+  signatureName        String
+  signatureData        String   @db.Text // Base64 image data URL
+  signedAt             DateTime @default(now())
+  
+  // Equipment / Truck Details (Made optional)
+  truckYear            String?
+  truckMake            String?
+  truckVin             String?
+  truckPlate           String?
+  truckPlateState      String?
+  trailerType          String?  // Dry Van, Flatbed, Reefer, etc.
+  
+  // Direct Deposit Details (Made optional)
+  bankName             String?
+  bankRouting          String?
+  bankAccount          String?
+  
+  // Status tracking for Admin Panel
+  status               String   @default("PENDING") // PENDING, REVIEWED, APPROVED, REJECTED
+}
