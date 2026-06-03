@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { 
   User, 
@@ -223,7 +224,7 @@ export default function ApplyPage() {
 
   // Restore draft on mount
   useEffect(() => {
-    const saved = localStorage.getItem("supertransport_onboarding_draft");
+    const saved = localStorage.getItem("marshalltransports_onboarding_draft");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -241,7 +242,7 @@ export default function ApplyPage() {
   const saveDraft = () => {
     try {
       const dataToSave = { ...formData, currentStep };
-      localStorage.setItem("supertransport_onboarding_draft", JSON.stringify(dataToSave));
+      localStorage.setItem("marshalltransports_onboarding_draft", JSON.stringify(dataToSave));
       triggerToast("Draft saved successfully! You can resume from this step when you return.", "success");
     } catch (e) {
       console.error("Failed to save draft", e);
@@ -251,7 +252,7 @@ export default function ApplyPage() {
 
   // Clear Draft
   const clearDraft = () => {
-    localStorage.removeItem("supertransport_onboarding_draft");
+    localStorage.removeItem("marshalltransports_onboarding_draft");
   };
 
   // Initialize canvas drawing listeners
@@ -675,12 +676,17 @@ export default function ApplyPage() {
       <header className="sticky top-0 z-50 w-full border-b border-brand-border bg-brand-dark/95 backdrop-blur-sm">
         <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="rounded-lg bg-gold/10 p-2 text-gold group-hover:bg-gold/20 transition-all duration-300">
-              <Truck className="h-7 w-7" />
+            <div className="relative h-12 w-12 overflow-hidden rounded-lg transition-all duration-300 group-hover:scale-105">
+              <Image 
+                src="/logo.png" 
+                alt="Marshall Transports Logo" 
+                fill 
+                className="object-contain"
+              />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-wider text-slate-50">SUPERTRANSPORT</span>
-              <span className="text-[10px] uppercase tracking-widest text-gold font-semibold">Established 2011</span>
+              <span className="text-xl font-bold tracking-wider text-slate-50">MARSHALL TRANSPORTS LLC</span>
+              <span className="text-[10px] uppercase tracking-widest text-gold font-semibold">Safety & Reliability</span>
             </div>
           </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-gold transition-colors duration-200">
@@ -699,7 +705,7 @@ export default function ApplyPage() {
               </div>
               <h1 className="text-3xl font-extrabold text-slate-50">Application Submitted!</h1>
               <p className="text-slate-400 max-w-md mx-auto leading-relaxed">
-                Thank you for applying to partner with SuperTransport. We have successfully received your CDL details, safety history, and qualification documents. A confirmation email has been dispatched to your address.
+                Thank you for applying to partner with Marshall Transports. We have successfully received your CDL details, safety history, and qualification documents. A confirmation email has been dispatched to your address.
               </p>
               <div className="pt-6">
                 <Link
@@ -1643,7 +1649,7 @@ export default function ApplyPage() {
                     <div className="space-y-3">
                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">Fair Credit Reporting Act Authorization</h4>
                       <div className="rounded-lg border border-brand-border bg-brand-dark/50 p-4 max-h-[120px] overflow-y-auto text-[11px] text-slate-400 leading-relaxed">
-                        I hereby authorize SUPERTRANSPORT to conduct a background investigation through a consumer reporting agency as permitted by the Fair Credit Reporting Act. This investigation may include, but is not limited to: Social Security Number verification, residential history, employment history, education verification, personal and professional references, credit history, criminal records, motor vehicle records (MVR), and any other public records deemed relevant. I understand that this investigation is a condition of my application and continued employment.
+                        I hereby authorize MARSHALL TRANSPORTS LLC to conduct a background investigation through a consumer reporting agency as permitted by the Fair Credit Reporting Act. This investigation may include, but is not limited to: Social Security Number verification, residential history, employment history, education verification, personal and professional references, credit history, criminal records, motor vehicle records (MVR), and any other public records deemed relevant. I understand that this investigation is a condition of my application and continued employment.
                       </div>
                     </div>
 
@@ -1652,7 +1658,7 @@ export default function ApplyPage() {
                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">PSP Authorization</h4>
                       <div className="rounded-lg border border-brand-border bg-brand-dark/50 p-4 max-h-[120px] overflow-y-auto text-[11px] text-slate-400 leading-relaxed">
                         <strong>Important Disclosure Regarding Background Reports from the PSP Online Service</strong>
-                        <p className="mt-1">In connection with your application for employment with SUPERTRANSPORT, LLC, we may obtain one or more reports regarding your driving and safety inspection history from the Federal Motor Carrier Safety Administration (FMCSA). If any adverse employment decision is made based on this information, you will be notified and provided a copy of the report.</p>
+                        <p className="mt-1">In connection with your application for employment with MARSHALL TRANSPORTS LLC, we may obtain one or more reports regarding your driving and safety inspection history from the Federal Motor Carrier Safety Administration (FMCSA). If any adverse employment decision is made based on this information, you will be notified and provided a copy of the report.</p>
                         <p className="mt-1">Neither the Prospective Employer nor the FMCSA contractor has the capability to correct safety data. You may challenge the accuracy of the data at https://dataqs.fmcsa.dot.gov.</p>
                       </div>
                     </div>
@@ -1667,7 +1673,7 @@ export default function ApplyPage() {
                           className="mt-1 h-4 w-4 accent-gold"
                         />
                         <span className="text-xs font-semibold text-slate-300 leading-relaxed">
-                          I authorize SUPERTRANSPORT, LLC to access the FMCSA Pre-Employment Screening Program (PSP) system to seek information regarding my commercial driving safety record and safety inspection history, including crash data from the previous five (5) years and inspection history from the previous three (3) years.
+                          I authorize MARSHALL TRANSPORTS LLC to access the FMCSA Pre-Employment Screening Program (PSP) system to seek information regarding my commercial driving safety record and safety inspection history, including crash data from the previous five (5) years and inspection history from the previous three (3) years.
                         </span>
                       </label>
                       {errors.fcraConsent && <p className="text-xs text-red-500 font-bold">{errors.fcraConsent}</p>}
@@ -1779,8 +1785,8 @@ export default function ApplyPage() {
                     <div className="border-t border-brand-border pt-5 space-y-3">
                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">Certificate of Receipt — Company Testing Policy</h4>
                       <div className="rounded-lg border border-brand-border bg-brand-dark/50 p-4 max-h-[100px] overflow-y-auto text-[11px] text-slate-400 leading-relaxed">
-                        <strong>SUPERTRANSPORT — Federal Motor Carrier Safety Compliance Notice</strong>
-                        <p className="mt-1">By accepting these terms, you acknowledge that you have received, read, and understand SUPERTRANSPORT&apos;s Drug and Alcohol Policy as required by 49 CFR §382.601. You certify that you are familiar with the requirements of 49 CFR Parts 40, 382, and 391, and you agree to comply with all applicable FMCSA regulations while operating under SUPERTRANSPORT&apos;s authority.</p>
+                        <strong>MARSHALL TRANSPORTS LLC — Federal Motor Carrier Safety Compliance Notice</strong>
+                        <p className="mt-1">By accepting these terms, you acknowledge that you have received, read, and understand MARSHALL TRANSPORTS LLC&apos;s Drug and Alcohol Policy as required by 49 CFR §382.601. You certify that you are familiar with the requirements of 49 CFR Parts 40, 382, and 391, and you agree to comply with all applicable FMCSA regulations while operating under MARSHALL TRANSPORTS LLC&apos;s authority.</p>
                       </div>
                       <label className="flex items-start gap-3 cursor-pointer pt-1">
                         <input
@@ -1956,11 +1962,11 @@ export default function ApplyPage() {
       {/* Footer */}
       <footer className="mt-auto border-t border-brand-border bg-brand-dark py-8 text-center text-xs text-slate-500">
         <div className="container mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p>Copyright &copy; 2026 | SUPERTRANSPORT | All Rights Reserved.</p>
+          <p>Copyright &copy; 2026 | MARSHALL TRANSPORTS LLC | All Rights Reserved.</p>
           <div className="flex gap-4">
-            <span className="font-semibold text-slate-400">DOT# 2309365</span>
+            <span className="font-semibold text-slate-400">DOT# 4172640</span>
             <span className="text-slate-600">|</span>
-            <span className="font-semibold text-slate-400">MC# 788425</span>
+            <span className="font-semibold text-slate-400">MC# 1605225</span>
           </div>
         </div>
       </footer>

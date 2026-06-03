@@ -7,7 +7,7 @@ import { sendApplicationStatusEmail } from "@/app/utils/email";
 async function checkAuth() {
   const cookieStore = await cookies();
   const token = cookieStore.get("admin_token");
-  return token?.value === "supertransport_admin_session";
+  return token?.value === "marshalltransports_admin_session";
 }
 
 export async function GET() {

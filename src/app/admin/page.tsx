@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Search,
   LogOut,
@@ -322,10 +323,15 @@ export default function AdminPage() {
           <div className="absolute top-0 inset-x-0 h-1 bg-[#c5a85c]" />
 
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 mb-2 text-amber-500 bg-amber-500/10 p-2.5 rounded-xl">
-              <Truck className="h-6 w-6" />
+            <div className="inline-flex items-center justify-center mb-2 mx-auto w-12 h-12 relative overflow-hidden rounded-lg">
+              <Image 
+                src="/logo.png" 
+                alt="Marshall Transports Logo" 
+                fill 
+                className="object-contain"
+              />
             </div>
-            <h1 className="text-xl font-black text-slate-50 tracking-wider">SUPERTRANSPORT</h1>
+            <h1 className="text-xl font-black text-slate-50 tracking-wider">MARSHALL TRANSPORTS LLC</h1>
             <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Admin Dashboard Login</p>
           </div>
 
@@ -391,8 +397,15 @@ export default function AdminPage() {
       {/* Dashboard Top Header */}
       <header className="flex h-16 items-center justify-between border-b border-slate-800 bg-[#161D2B] px-8 shrink-0">
         <div className="flex items-center gap-3">
-          <Truck className="h-6 w-6 text-amber-500" />
-          <span className="font-black tracking-wider text-slate-50 uppercase text-sm">SUPERTRANSPORT</span>
+          <div className="relative h-10 w-10 overflow-hidden rounded-lg">
+            <Image 
+              src="/logo.png" 
+              alt="Marshall Transports Logo" 
+              fill 
+              className="object-contain"
+            />
+          </div>
+          <span className="font-black tracking-wider text-slate-50 uppercase text-sm">MARSHALL TRANSPORTS LLC</span>
           <span className="rounded bg-amber-500/10 px-2.5 py-0.5 text-[9px] text-amber-500 font-bold uppercase tracking-wider">
             Safety & Onboarding Panel
           </span>

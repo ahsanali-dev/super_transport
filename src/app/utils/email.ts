@@ -75,8 +75,8 @@ export async function sendApplicationEmails(app: ApplicationMailDetails) {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const secure = process.env.SMTP_SECURE === 'true';
-  const from = process.env.EMAIL_FROM || 'info@mysupertransport.com';
-  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'info@mysupertransport.com';
+  const from = process.env.EMAIL_FROM || 'info@marshalltransports.com';
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'info@marshalltransports.com';
 
   if (!host || !user || !pass) {
     console.warn('SMTP configuration is missing. Skipping email notifications.');
@@ -132,13 +132,13 @@ export async function sendApplicationEmails(app: ApplicationMailDetails) {
   const applicantHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff; color: #1e293b;">
       <div style="background-color: #0b0f19; padding: 20px; border-radius: 6px 6px 0 0; text-align: center;">
-        <h1 style="color: #d4af37; margin: 0; font-size: 24px; letter-spacing: 1px;">SUPERTRANSPORT</h1>
+        <h1 style="color: #d4af37; margin: 0; font-size: 24px; letter-spacing: 1px;">MARSHALL TRANSPORTS LLC</h1>
         <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Driver Onboarding</p>
       </div>
       <div style="padding: 20px;">
         <h2 style="color: #0b0f19; margin-top: 0;">Application Confirmed</h2>
         <p>Dear ${app.firstName},</p>
-        <p>Thank you for submitting your driver onboarding application to partner with <strong>SUPERTRANSPORT LLC</strong>.</p>
+        <p>Thank you for submitting your driver onboarding application to partner with <strong>MARSHALL TRANSPORTS LLC</strong>.</p>
         <p>We have successfully received your CDL details, safety history, and qualification documents. Below is a summary of the details you submitted:</p>
         
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -170,10 +170,10 @@ export async function sendApplicationEmails(app: ApplicationMailDetails) {
         
         <p>Our safety manager Marc Mueller and the onboarding team will review your application, query your FMCSA Clearinghouse status, verify your MVR, and contact you in the next 24-48 business hours.</p>
         
-        <p style="margin-top: 30px;">Best regards,<br/><strong>Onboarding Team</strong><br/>SUPERTRANSPORT LLC</p>
+        <p style="margin-top: 30px;">Best regards,<br/><strong>Onboarding Team</strong><br/>MARSHALL TRANSPORTS LLC</p>
       </div>
       <div style="background-color: #f8fafc; padding: 15px; border-radius: 0 0 6px 6px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
-        SUPERTRANSPORT | 605 Madison St, Pleasant Hill, MO 64080 | DOT# 2309365 | MC# 788425
+        MARSHALL TRANSPORTS LLC | 1114 Granger st union city, tn 38261 | DOT# 4172640 | MC# 1605225
       </div>
     </div>
   `;
@@ -183,7 +183,7 @@ export async function sendApplicationEmails(app: ApplicationMailDetails) {
     <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff; color: #1e293b;">
       <div style="background-color: #c5a85c; padding: 20px; border-radius: 6px 6px 0 0; text-align: center;">
         <h1 style="color: #ffffff; margin: 0; font-size: 22px;">NEW APPLICANT NOTIFICATION</h1>
-        <p style="color: #f1f5f9; margin: 5px 0 0 0; font-size: 12px; letter-spacing: 1px;">SuperTransport Onboarding Portal</p>
+        <p style="color: #f1f5f9; margin: 5px 0 0 0; font-size: 12px; letter-spacing: 1px;">Marshall Transports Onboarding Portal</p>
       </div>
       <div style="padding: 20px;">
         
@@ -297,7 +297,7 @@ export async function sendApplicationEmails(app: ApplicationMailDetails) {
           </tr>
         </table>
 
-        <p style="margin-top: 30px; font-size: 13px;">Log in to the <strong>SUPERTRANSPORT Admin Dashboard</strong> to verify the uploaded document files, examine the signature, and change application status.</p>
+        <p style="margin-top: 30px; font-size: 13px;">Log in to the <strong>MARSHALL TRANSPORTS LLC Admin Dashboard</strong> to verify the uploaded document files, examine the signature, and change application status.</p>
       </div>
     </div>
   `;
@@ -307,7 +307,7 @@ export async function sendApplicationEmails(app: ApplicationMailDetails) {
     await transporter.sendMail({
       from,
       to: app.email,
-      subject: 'SUPERTRANSPORT | Onboarding Application Confirmed',
+      subject: 'MARSHALL TRANSPORTS LLC | Onboarding Application Confirmed',
       html: applicantHtml,
     });
 
@@ -337,7 +337,7 @@ export async function sendApplicationStatusEmail(
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const secure = process.env.SMTP_SECURE === 'true';
-  const from = process.env.EMAIL_FROM || 'info@mysupertransport.com';
+  const from = process.env.EMAIL_FROM || 'info@marshalltransports.com';
 
   if (!host || !user || !pass) {
     console.warn('SMTP configuration is missing. Skipping status email notification.');
@@ -357,13 +357,13 @@ export async function sendApplicationStatusEmail(
 
   const isApproved = status === "APPROVED";
   const subject = isApproved 
-    ? 'SUPERTRANSPORT | Onboarding Application Approved - Next Steps' 
-    : 'SUPERTRANSPORT | Onboarding Application Status Update';
+    ? 'MARSHALL TRANSPORTS LLC | Onboarding Application Approved - Next Steps' 
+    : 'MARSHALL TRANSPORTS LLC | Onboarding Application Status Update';
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff; color: #1e293b;">
       <div style="background-color: #0b0f19; padding: 20px; border-radius: 6px 6px 0 0; text-align: center;">
-        <h1 style="color: #d4af37; margin: 0; font-size: 24px; letter-spacing: 1px;">SUPERTRANSPORT</h1>
+        <h1 style="color: #d4af37; margin: 0; font-size: 24px; letter-spacing: 1px;">MARSHALL TRANSPORTS LLC</h1>
         <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Driver Onboarding</p>
       </div>
       <div style="padding: 20px; line-height: 1.6;">
@@ -373,7 +373,7 @@ export async function sendApplicationStatusEmail(
         <p>Dear ${firstName},</p>
         
         ${isApproved ? `
-          <p>Congratulations! We are pleased to inform you that your driver onboarding application with <strong>SUPERTRANSPORT LLC</strong> has been <strong>Approved</strong>.</p>
+          <p>Congratulations! We are pleased to inform you that your driver onboarding application with <strong>MARSHALL TRANSPORTS LLC</strong> has been <strong>Approved</strong>.</p>
           <p>Our safety and compliance team has successfully vetted your CDL credentials, safety records, and qualification documents. You have met all of our partnership standards.</p>
           
           <h3 style="color: #0b0f19; margin-top: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; font-size: 15px;">Next Onboarding Steps:</h3>
@@ -383,16 +383,16 @@ export async function sendApplicationStatusEmail(
           </ol>
           <p>Welcome to the family! We are excited to partner with you and look forward to a mutually successful journey.</p>
         ` : `
-          <p>Thank you for your interest in partnering and leasing on with <strong>SUPERTRANSPORT LLC</strong>.</p>
+          <p>Thank you for your interest in partnering and leasing on with <strong>MARSHALL TRANSPORTS LLC</strong>.</p>
           <p>After careful review of your driver qualification history, safety screening, and compliance records, we regret to inform you that we are unable to approve your onboarding application at this time.</p>
           <p>Our hiring and partnership policy is governed by strict safety, compliance, and insurance guidelines. Although we cannot move forward today, we sincerely appreciate your interest, time, and effort in applying.</p>
           <p>We wish you safe travels and success in your future endeavors.</p>
         `}
         
-        <p style="margin-top: 30px;">Best regards,<br/><strong>Safety & Compliance Team</strong><br/>SUPERTRANSPORT LLC</p>
+        <p style="margin-top: 30px;">Best regards,<br/><strong>Safety & Compliance Team</strong><br/>MARSHALL TRANSPORTS LLC</p>
       </div>
       <div style="background-color: #f8fafc; padding: 15px; border-radius: 0 0 6px 6px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
-        SUPERTRANSPORT | 605 Madison St, Pleasant Hill, MO 64080 | DOT# 2309365 | MC# 788425
+        MARSHALL TRANSPORTS LLC | 1114 Granger st union city, tn 38261 | DOT# 4172640 | MC# 1605225
       </div>
     </div>
   `;
@@ -423,8 +423,8 @@ export async function sendInquiryEmail(details: {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const secure = process.env.SMTP_SECURE === 'true';
-  const from = process.env.EMAIL_FROM || 'info@mysupertransport.com';
-  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'info@mysupertransport.com';
+  const from = process.env.EMAIL_FROM || 'info@marshalltransports.com';
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'info@marshalltransports.com';
 
   if (!host || !user || !pass) {
     console.warn('SMTP configuration is missing. Skipping email notifications.');
@@ -444,12 +444,12 @@ export async function sendInquiryEmail(details: {
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff; color: #1e293b;">
       <div style="background-color: #0b0f19; padding: 20px; border-radius: 6px 6px 0 0; text-align: center;">
-        <h1 style="color: #d4af37; margin: 0; font-size: 24px; letter-spacing: 1px;">SUPERTRANSPORT</h1>
+        <h1 style="color: #d4af37; margin: 0; font-size: 24px; letter-spacing: 1px;">MARSHALL TRANSPORTS LLC</h1>
         <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Quick Inquiry</p>
       </div>
       <div style="padding: 20px; line-height: 1.6;">
         <h2 style="color: #0b0f19; margin-top: 0; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px;">New Contact/Inquiry Received</h2>
-        <p>A new quick inquiry has been submitted from the SuperTransport landing page. Details are below:</p>
+        <p>A new quick inquiry has been submitted from the Marshall Transports landing page. Details are below:</p>
         
         <table style="width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 13px;">
           <tr>
@@ -476,7 +476,7 @@ export async function sendInquiryEmail(details: {
         </div>
       </div>
       <div style="background-color: #f8fafc; padding: 15px; border-radius: 0 0 6px 6px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
-        SUPERTRANSPORT | 605 Madison St, Pleasant Hill, MO 64080 | DOT# 2309365 | MC# 788425
+        MARSHALL TRANSPORTS LLC | 1114 Granger st union city, tn 38261 | DOT# 4172640 | MC# 1605225
       </div>
     </div>
   `;

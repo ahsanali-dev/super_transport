@@ -6,12 +6,12 @@ export async function POST(request: Request) {
     const { username, password } = await request.json();
 
     const expectedUsername = process.env.ADMIN_USERNAME || "admin";
-    const expectedPassword = process.env.ADMIN_PASSWORD || "SuperTransportAdminPassword2026!";
+    const expectedPassword = process.env.ADMIN_PASSWORD || "MarshallTransportsAdminPassword2026!";
 
     if (username === expectedUsername && password === expectedPassword) {
       // Set HTTP-only session cookie
       const cookieStore = await cookies();
-      cookieStore.set("admin_token", "supertransport_admin_session", {
+      cookieStore.set("admin_token", "marshalltransports_admin_session", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

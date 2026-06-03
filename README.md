@@ -1,6 +1,6 @@
-# SUPERTRANSPORT LLC | Driver Onboarding Portal & Admin Dashboard
+# MARSHALL TRANSPORTS LLC | Driver Onboarding Portal & Admin Dashboard
 
-A premium, full-stack Next.js web application designed for **SUPERTRANSPORT LLC** (Established 2011). This portal features a comprehensive, 9-step driver qualification onboarding stepper form, a secure administrative dashboard, and automated email vetting notifications.
+A premium, full-stack Next.js web application designed for **MARSHALL TRANSPORTS LLC**. This portal features a comprehensive, 9-step driver qualification onboarding stepper form, a secure administrative dashboard, and automated email vetting notifications.
 
 ---
 
@@ -76,7 +76,7 @@ SMTP_SECURE="false" # Set to "true" for port 465, "false" for 587 (STARTTLS)
 
 # Sender and Recipient Address Configuration
 EMAIL_FROM="your-gmail-address@gmail.com"
-ADMIN_NOTIFY_EMAIL="info@mysupertransport.com"
+ADMIN_NOTIFY_EMAIL="info@marshalltransports.com"
 ```
 
 *Note: If you use Gmail, you must generate a 16-character **App Password** from your Google Account Security settings.*
@@ -121,7 +121,7 @@ npm run start
 │   └── schema.prisma         # Database models for Driver Applications
 ├── public/
 │   ├── favicon.ico
-│   └── hero.png              # SuperTransport Landing Page Hero Image
+│   └── hero.png              # Marshall Transports Landing Page Hero Image
 └── src/
     └── app/
         ├── admin/

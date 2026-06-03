@@ -114,12 +114,17 @@ export default function Home() {
       <header className="sticky top-0 z-50 w-full border-b border-brand-border bg-brand-dark/95 backdrop-blur-sm">
         <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="rounded-lg bg-gold/10 p-2 text-gold group-hover:bg-gold/20 transition-all duration-300">
-              <Truck className="h-7 w-7" />
+            <div className="relative h-12 w-12 overflow-hidden rounded-lg transition-all duration-300 group-hover:scale-105">
+              <Image 
+                src="/logo.png" 
+                alt="Marshall Transports Logo" 
+                fill 
+                className="object-contain"
+              />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-wider text-slate-50">SUPERTRANSPORT</span>
-              <span className="text-[10px] uppercase tracking-widest text-gold font-semibold">Established 2011</span>
+              <span className="text-xl font-bold tracking-wider text-slate-50">MARSHALL TRANSPORTS LLC</span>
+              <span className="text-[10px] uppercase tracking-widest text-gold font-semibold">Safety & Reliability</span>
             </div>
           </Link>
           
@@ -266,7 +271,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/hero.png"
-            alt="SuperTransport Truck"
+            alt="Marshall Transports Truck"
             fill
             className="object-cover opacity-35"
             priority
@@ -278,7 +283,7 @@ export default function Home() {
         <div className="container relative z-10 mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col space-y-8 max-w-xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-1.5 text-xs font-semibold text-gold tracking-wide uppercase">
-              <ShieldCheck className="h-4 w-4" /> MC# 788425
+              <ShieldCheck className="h-4 w-4" /> MC# 1605225
             </div>
             
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight text-slate-50 tracking-tight">
@@ -287,7 +292,7 @@ export default function Home() {
             </h1>
             
             <p className="text-lg text-slate-300 leading-relaxed">
-              We know trucking because we&apos;ve lived it. Founded by a driver who started with a single truck, we&apos;ve been helping independent operators succeed since 2011.
+              We know trucking because we&apos;ve lived it. Founded by a driver who started with a single truck, we&apos;ve been helping independent operators succeed with dedicated service.
             </p>
 
             {/* Mission Box */}
@@ -346,7 +351,7 @@ export default function Home() {
       <section id="operators" className="py-24 border-t border-brand-border bg-brand-dark/50">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-sm font-bold uppercase tracking-widest text-gold">The SuperTransport Edge</span>
+            <span className="text-sm font-bold uppercase tracking-widest text-gold">The Marshall Transports Edge</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold mt-3 text-slate-50">Partners, Not Numbers</h2>
             <div className="w-16 h-1 bg-gold mx-auto mt-4 rounded-full" />
           </div>
@@ -404,10 +409,10 @@ export default function Home() {
                   Driver Qualification & Hiring Policy
                 </h2>
                 <p className="text-sm text-slate-400 leading-relaxed">
-                  All applicants must review and sign our official Driver Qualification & Hiring Policy. This is the first step toward getting leased on with SuperTransport.
+                  All applicants must review and sign our official Driver Qualification & Hiring Policy. This is the first step toward getting leased on with Marshall Transports.
                 </p>
                 <a
-                  href="https://pdf.ac/RCZwt"
+                  href="/policy.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-bold text-brand-dark transition-all duration-200 hover:bg-gold-hover hover:scale-[1.02]"
@@ -510,7 +515,7 @@ export default function Home() {
                     value={inquiryPhone}
                     onChange={(e) => setInquiryPhone(e.target.value)}
                     className="w-full rounded-lg border border-brand-border bg-brand-dark px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:border-gold focus:outline-none"
-                    placeholder="(833) 337-8737"
+                    placeholder="(215) 948-6110"
                     required
                   />
                 </div>
@@ -613,7 +618,7 @@ export default function Home() {
                 <span className="text-sm font-bold uppercase tracking-widest text-gold">Office & Location</span>
                 <h2 className="text-3xl font-extrabold mt-3 text-slate-50">Get In Touch</h2>
                 <p className="text-sm text-slate-400 mt-2">
-                  Call, text, or visit our office. We are located in Pleasant Hill, Missouri.
+                  Call, text, or visit our office. We are located in Union City, Tennessee.
                 </p>
               </div>
 
@@ -624,8 +629,8 @@ export default function Home() {
                   </div>
                   <div>
                     <h5 className="font-bold text-slate-200">Business Location</h5>
-                    <p className="text-sm text-slate-400">605 Madison St, Pleasant Hill, MO 64080</p>
-                    <p className="text-[10px] text-slate-600 mt-1 font-mono">GPS: 38.7875° N, 94.2694° W</p>
+                    <p className="text-sm text-slate-400">1114 Granger st union city, tn 38261</p>
+                    <p className="text-[10px] text-slate-600 mt-1 font-mono">GPS: 36.4242° N, 89.0567° W</p>
                   </div>
                 </div>
 
@@ -635,8 +640,8 @@ export default function Home() {
                   </div>
                   <div>
                     <h5 className="font-bold text-slate-200">Call / Text Support</h5>
-                    <p className="text-sm text-slate-400">Call: (833) 33 SUPER (833-337-8737)</p>
-                    <p className="text-sm text-slate-400">Text: 83333SUPER (833-337-8737)</p>
+                    <p className="text-sm text-slate-400">Call: (215) 948-6110</p>
+                    <p className="text-sm text-slate-400">Text: (215) 948-6110</p>
                   </div>
                 </div>
 
@@ -646,7 +651,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h5 className="font-bold text-slate-200">Email Address</h5>
-                    <p className="text-sm text-slate-400">info@mysupertransport.com</p>
+                    <p className="text-sm text-slate-400">info@marshalltransports.com</p>
                   </div>
                 </div>
               </div>
@@ -675,7 +680,7 @@ export default function Home() {
 
               <div className="mt-8 p-4 rounded-xl border border-brand-border bg-brand-dark/40 text-center">
                 <span className="text-xs text-slate-500 font-semibold">Owner & Operator Management</span>
-                <h4 className="text-base font-bold text-slate-200 mt-1">Marc Mueller, Owner</h4>
+                <h4 className="text-base font-bold text-slate-200 mt-1">Management Team</h4>
               </div>
             </div>
           </div>
@@ -685,14 +690,54 @@ export default function Home() {
       {/* Footer */}
       <footer className="mt-auto border-t border-brand-border bg-brand-dark py-8 text-center text-xs text-slate-500">
         <div className="container mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p>Copyright &copy; 2026 | SUPERTRANSPORT | All Rights Reserved.</p>
+          <p>Copyright &copy; 2026 | MARSHALL TRANSPORTS LLC | All Rights Reserved.</p>
           <div className="flex gap-4">
-            <span className="font-semibold text-slate-400">DOT# 2309365</span>
+            <span className="font-semibold text-slate-400">DOT# 4172640</span>
             <span className="text-slate-600">|</span>
-            <span className="font-semibold text-slate-400">MC# 788425</span>
+            <span className="font-semibold text-slate-400">MC# 1605225</span>
           </div>
         </div>
       </footer>
+
+      {/* Structured Schema Data for SEO (JSON-LD) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "@id": "https://marshalltransports.com/#organization",
+            "name": "Marshall Transports LLC",
+            "url": "https://marshalltransports.com",
+            "logo": "https://marshalltransports.com/logo.png",
+            "image": "https://marshalltransports.com/hero.png",
+            "description": "Marshall Transports LLC partners with independent owner-operators across America, specializing in dry van and power-only freight services built on safety, integrity, and compliance.",
+            "telephone": "+1-215-948-6110",
+            "email": "info@marshalltransports.com",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "1114 Granger St",
+              "addressLocality": "Union City",
+              "addressRegion": "TN",
+              "postalCode": "38261",
+              "addressCountry": "US"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 36.4242,
+              "longitude": -89.0567
+            },
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "07:00",
+                "closes": "17:00"
+              }
+            ]
+          })
+        }}
+      />
     </div>
   );
 }
