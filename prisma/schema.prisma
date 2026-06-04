@@ -75,6 +75,7 @@ model DriverApplication {
   
   // Signature & Consent
   ssn                  String?
+  ein                  String?
   signatureName        String
   signatureData        String   @db.Text // Base64 image data URL
   signedAt             DateTime @default(now())

@@ -11,7 +11,10 @@ const BUCKET = "driver-documents";
  */
 async function uploadBase64ToStorage(
   base64DataUrl: string | undefined | null,
-  fileName: string
+  folder: string,
+  baseName: string,
+  uploaderName: string,
+  originalName?: string | null
 ): Promise<string | null> {
   if (!base64DataUrl) return null;
 
@@ -32,7 +35,22 @@ async function uploadBase64ToStorage(
     ? "webp"
     : "jpg";
 
-  const filePath = `${fileName}.${ext}`;
+  // Sanitize original file name if present
+  let sanitizedOriginal = "";
+  if (originalName) {
+    // Remove extension from original filename
+    const lastDot = originalName.lastIndexOf(".");
+    const nameWithoutExt = lastDot !== -1 ? originalName.substring(0, lastDot) : originalName;
+    // Replace non-alphanumeric characters with hyphens
+    const cleanName = nameWithoutExt.toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/-+/g, "-");
+    if (cleanName) {
+      sanitizedOriginal = `_${cleanName}`;
+    }
+  }
+
+  // Construct filePath: folder/baseName_uploaderName_originalName.ext
+  // E.g.: folder/dl-front_john-doe_my-license-pic.webp
+  const filePath = `${folder}/${baseName}_${uploaderName}${sanitizedOriginal}.${ext}`;
 
   const { error } = await supabaseAdmin.storage
     .from(BUCKET)
@@ -42,7 +60,7 @@ async function uploadBase64ToStorage(
     });
 
   if (error) {
-    console.error(`Storage upload failed for ${fileName}:`, error.message);
+    console.error(`Storage upload failed for ${filePath}:`, error.message);
     return null;
   }
 
@@ -61,17 +79,16 @@ export async function POST(request: Request) {
     }
 
     // Generate unique UUID-based prefix for this applicant's files
-    // UUID = 128-bit random = practically impossible to guess
     const uuid = crypto.randomUUID();
     const nameSlug = `${body.firstName}-${body.lastName}`.toLowerCase().replace(/[^a-z0-9-]/g, "");
     const folder = `${uuid}/${nameSlug}`;
 
     // Upload documents to Supabase Storage (in parallel for speed)
     const [docDlFrontUrl, docDlBackUrl, docMedCertUrl, signatureUrl] = await Promise.all([
-      uploadBase64ToStorage(body.docDlFront,    `${folder}/dl-front`),
-      uploadBase64ToStorage(body.docDlBack,     `${folder}/dl-back`),
-      uploadBase64ToStorage(body.docMedCert,    `${folder}/med-cert`),
-      uploadBase64ToStorage(body.signatureData, `${folder}/signature`),
+      uploadBase64ToStorage(body.docDlFront,    folder, "dl-front", nameSlug, body.docDlFrontName),
+      uploadBase64ToStorage(body.docDlBack,     folder, "dl-back", nameSlug, body.docDlBackName),
+      uploadBase64ToStorage(body.docMedCert,    folder, "med-cert", nameSlug, body.docMedCertName),
+      uploadBase64ToStorage(body.signatureData, folder, "signature", nameSlug, null),
     ]);
 
     // Save submission to database via Prisma — only URLs stored, not raw Base64
@@ -136,7 +153,8 @@ export async function POST(request: Request) {
         drugTestDoc:          !!body.drugTestDoc,
         companyPolicyConsent: !!body.companyPolicyConsent,
 
-        ssn:           body.ssn || null,
+        ssn:           (body.taxIdType || "SSN") === "SSN" ? body.ssn : null,
+        ein:           (body.taxIdType || "SSN") === "EIN" ? body.ein : null,
         signatureName: body.signatureName,
         // Store uploaded URL; fall back to original Base64 if upload failed
         signatureData: signatureUrl || body.signatureData,
@@ -197,7 +215,9 @@ export async function POST(request: Request) {
       drugTestDoc:          !!body.drugTestDoc,
       companyPolicyConsent: !!body.companyPolicyConsent,
 
-      ssnMasked:     body.ssn ? `***-**-${body.ssn.slice(-4)}` : undefined,
+      taxIdType:     body.taxIdType || "SSN",
+      ssnMasked:     (body.taxIdType || "SSN") === "SSN" && body.ssn ? `***-**-${body.ssn.slice(-4)}` : undefined,
+      einMasked:     (body.taxIdType || "SSN") === "EIN" && body.ein ? `**-***${body.ein.slice(-4)}` : undefined,
       signatureName: body.signatureName,
       signatureData: signatureUrl || body.signatureData,
     }).catch((err) => {

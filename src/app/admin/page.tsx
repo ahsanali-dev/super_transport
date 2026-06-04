@@ -90,6 +90,7 @@ interface DriverApplication {
   companyPolicyConsent: boolean;
   
   ssn: string | null;
+  ein: string | null;
   signatureName: string;
   signatureData: string;
   signedAt: string;
@@ -212,6 +213,54 @@ export default function AdminPage() {
     }
   };
 
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      if (url.startsWith("data:")) {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+      
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Failed to download file:", err);
+      window.open(url, "_blank");
+    }
+  };
+
+  const getDownloadFilename = (url: string, label: string) => {
+    if (!selectedApp) return `${label.replace(/\s+/g, '_')}.jpg`;
+    const cleanLabel = label.toLowerCase().replace(/\s+/g, '-');
+    const name = `${selectedApp.firstName}-${selectedApp.lastName}`.toLowerCase().replace(/\s+/g, '-');
+    let ext = "jpg";
+    if (url.toLowerCase().includes(".pdf")) {
+      ext = "pdf";
+    } else {
+      try {
+        const urlObj = new URL(url);
+        const pathname = urlObj.pathname;
+        const lastDot = pathname.lastIndexOf(".");
+        if (lastDot !== -1) {
+          ext = pathname.substring(lastDot + 1);
+        }
+      } catch (e) {}
+    }
+    return `${name}-${cleanLabel}.${ext}`;
+  };
+
   // Helper to render documents — handles direct URLs (Supabase) and legacy Base64
   const renderDocPreview = (docValue: string | null, label: string) => {
     if (!docValue) {
@@ -236,8 +285,6 @@ export default function AdminPage() {
       src.startsWith("data:application/pdf") ||
       src.toLowerCase().includes(".pdf");
 
-    const isExternal = src.startsWith("http");
-
     if (isPdf) {
       return (
         <div className="space-y-2">
@@ -249,14 +296,25 @@ export default function AdminPage() {
                 <span className="text-[10px] text-slate-500">Document format: PDF</span>
               </div>
             </div>
-            <a
-              href={src}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-slate-950 transition flex items-center gap-1 text-[11px] font-bold"
-            >
-              <Download className="h-3.5 w-3.5" /> Open / Download
-            </a>
+            <div className="flex items-center gap-2">
+              <a
+                href={src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 px-2 rounded-lg border border-slate-700 hover:border-amber-500 text-slate-300 hover:text-amber-500 transition text-[11px] font-semibold"
+              >
+                Open ↗
+              </a>
+              <button
+                onClick={() => {
+                  const filename = getDownloadFilename(src, label);
+                  handleDownload(src, filename);
+                }}
+                className="p-1.5 px-2.5 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-slate-950 transition flex items-center gap-1 text-[11px] font-bold"
+              >
+                <Download className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
           <iframe src={src} className="w-full h-[220px] rounded-lg border border-slate-700 bg-slate-800" />
         </div>
@@ -267,15 +325,25 @@ export default function AdminPage() {
       <div className="space-y-2">
         <div className="flex justify-between items-center text-xs text-slate-400">
           <span className="font-semibold">{label}</span>
-          <a
-            href={src}
-            target={isExternal ? "_blank" : undefined}
-            rel={isExternal ? "noopener noreferrer" : undefined}
-            download={isExternal ? undefined : `${label.replace(/\s+/g, '_')}.jpg`}
-            className="text-[10px] text-amber-500 underline flex items-center gap-0.5"
-          >
-            {isExternal ? "Open Full Size \u2197" : "Download Image"}
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-amber-500 hover:text-amber-400 transition flex items-center border border-amber-500 p-1 rounded-sm"
+            >
+              <Eye className="h-3 w-3" />
+            </a>
+            <button
+              onClick={() => {
+                const filename = getDownloadFilename(src, label);
+                handleDownload(src, filename);
+              }}
+              className="text-[10px] text-amber-500 hover:text-amber-400 transition flex items-center gap-1 font-semibold border border-amber-500 p-1 rounded-sm cursor-pointer"
+            >
+              <Download className="h-3 w-3" />
+            </button>
+          </div>
         </div>
         <div className="rounded-xl border border-slate-700 bg-slate-900 overflow-hidden flex items-center justify-center h-[220px]">
           <img src={src} alt={label} className="max-h-full max-w-full object-contain" />
@@ -575,20 +643,28 @@ export default function AdminPage() {
                       <span className="font-semibold text-slate-200">{selectedApp.dob}</span>
                     </div>
                     <div className="flex justify-between items-center bg-[#0B0F19] p-2.5 rounded-lg border border-slate-800">
-                      <span className="text-slate-400 font-semibold font-mono text-[10px]">SSN:</span>
+                      <span className="text-slate-400 font-semibold font-mono text-[10px]">
+                        {selectedApp.ein ? "EIN:" : "SSN:"}
+                      </span>
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-slate-200 font-semibold">
-                          {revealSSN 
-                            ? selectedApp.ssn 
-                            : selectedApp.ssn 
-                              ? `***-**-${selectedApp.ssn.slice(-4)}` 
-                              : "Not provided"}
+                          {selectedApp.ein ? (
+                            revealSSN
+                              ? selectedApp.ein
+                              : `**-***${selectedApp.ein.slice(-4)}`
+                          ) : (
+                            revealSSN
+                              ? selectedApp.ssn
+                              : selectedApp.ssn
+                                ? `***-**-${selectedApp.ssn.slice(-4)}`
+                                : "Not provided"
+                          )}
                         </span>
-                        {selectedApp.ssn && (
+                        {(selectedApp.ssn || selectedApp.ein) && (
                           <button
                             type="button"
                             onClick={() => setRevealSSN(!revealSSN)}
-                            className="text-slate-400 hover:text-amber-500"
+                            className="text-slate-400 hover:text-amber-500 cursor-pointer"
                           >
                             {revealSSN ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                           </button>

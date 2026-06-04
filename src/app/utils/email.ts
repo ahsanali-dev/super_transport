@@ -64,7 +64,9 @@ interface ApplicationMailDetails {
   drugTestDoc: boolean;
   companyPolicyConsent: boolean;
   
+  taxIdType?: string;
   ssnMasked?: string;
+  einMasked?: string;
   signatureName: string;
   signatureData: string; // Base64 signature image
 }
@@ -194,8 +196,8 @@ export async function sendApplicationEmails(app: ApplicationMailDetails) {
             <td style="padding: 6px 0;">${fullName}</td>
           </tr>
           <tr>
-            <td style="padding: 6px 0; font-weight: bold;">SSN (Masked):</td>
-            <td style="padding: 6px 0;">${app.ssnMasked || 'Not provided'}</td>
+            <td style="padding: 6px 0; font-weight: bold;">${app.taxIdType === "EIN" ? "EIN (Masked)" : "SSN (Masked)"}:</td>
+            <td style="padding: 6px 0;">${app.taxIdType === "EIN" ? (app.einMasked || 'Not provided') : (app.ssnMasked || 'Not provided')}</td>
           </tr>
           <tr>
             <td style="padding: 6px 0; font-weight: bold;">Phone:</td>

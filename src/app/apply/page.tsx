@@ -79,8 +79,11 @@ interface ApplicationData {
   sapStatus: boolean; // participating in RTD/SAP?
   
   docDlFront: string; // Base64
+  docDlFrontName: string;
   docDlBack: string; // Base64
+  docDlBackName: string;
   docMedCert: string; // Base64
+  docMedCertName: string;
   
   fcraConsent: boolean;
   pspConsent: boolean;
@@ -89,7 +92,9 @@ interface ApplicationData {
   drugTestDoc: boolean;
   companyPolicyConsent: boolean;
   
+  taxIdType: "SSN" | "EIN";
   ssn: string;
+  ein: string;
   signatureName: string;
   signatureData: string; // Base64 signature image
 }
@@ -136,8 +141,11 @@ const initialData: ApplicationData = {
   sapStatus: false,
   
   docDlFront: "",
+  docDlFrontName: "",
   docDlBack: "",
+  docDlBackName: "",
   docMedCert: "",
+  docMedCertName: "",
   
   fcraConsent: false,
   pspConsent: false,
@@ -146,7 +154,9 @@ const initialData: ApplicationData = {
   drugTestDoc: false,
   companyPolicyConsent: false,
   
+  taxIdType: "SSN",
   ssn: "",
+  ein: "",
   signatureName: "",
   signatureData: "",
 };
@@ -365,6 +375,52 @@ export default function ApplyPage() {
     }
   };
 
+  const handleSSNChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, ""); // strip non-digits
+    if (val.length > 9) val = val.substring(0, 9);
+    
+    // Format: XXX-XX-XXXX
+    let formatted = "";
+    if (val.length > 5) {
+      formatted = `${val.substring(0, 3)}-${val.substring(3, 5)}-${val.substring(5)}`;
+    } else if (val.length > 3) {
+      formatted = `${val.substring(0, 3)}-${val.substring(3)}`;
+    } else {
+      formatted = val;
+    }
+
+    setFormData(prev => ({ ...prev, ssn: formatted }));
+    if (errors.ssn) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next.ssn;
+        return next;
+      });
+    }
+  };
+
+  const handleEINChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, ""); // strip non-digits
+    if (val.length > 9) val = val.substring(0, 9);
+    
+    // Format: XX-XXXXXXX
+    let formatted = "";
+    if (val.length > 2) {
+      formatted = `${val.substring(0, 2)}-${val.substring(2)}`;
+    } else {
+      formatted = val;
+    }
+
+    setFormData(prev => ({ ...prev, ein: formatted }));
+    if (errors.ein) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next.ein;
+        return next;
+      });
+    }
+  };
+
   const handleCheckboxChange = (name: keyof ApplicationData, value: boolean) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -395,15 +451,83 @@ export default function ApplyPage() {
     });
   };
 
-  // Convert uploaded documents to Base64
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'docDlFront' | 'docDlBack' | 'docMedCert') => {
+  // Utility to compress and convert images to WebP base64
+  const compressAndConvertToWebP = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (typeof event.target?.result !== "string") {
+          reject(new Error("Failed to read file"));
+          return;
+        }
+
+        const img = document.createElement("img");
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          // Limit max dimensions to 1600px to balance quality and file size
+          const MAX_DIM = 1600;
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Failed to get 2d context"));
+            return;
+          }
+
+          // Draw the image onto the canvas
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to WebP base64 with 70% quality compression
+          const webpDataUrl = canvas.toDataURL("image/webp", 0.7);
+          resolve(webpDataUrl);
+        };
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = event.target.result;
+      };
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const readAsBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to read file as base64"));
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Convert uploaded documents to Base64 (compress & webp for images)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'docDlFront' | 'docDlBack' | 'docMedCert') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Validate type
-    const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    const isImage = file.type.startsWith("image/");
     if (!validTypes.includes(file.type)) {
-      triggerToast("Only PDF, JPG, or PNG files are accepted.", "error");
+      triggerToast("Only PDF, JPG, PNG, or WebP files are accepted.", "error");
       return;
     }
 
@@ -413,21 +537,36 @@ export default function ApplyPage() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setFormData(prev => ({ ...prev, [fieldName]: reader.result as string }));
-        if (errors[fieldName]) {
-          setErrors(prev => {
-            const next = { ...prev };
-            delete next[fieldName];
-            return next;
-          });
-        }
+    try {
+      let base64Result = "";
+      if (isImage) {
+        base64Result = await compressAndConvertToWebP(file);
+      } else {
+        base64Result = await readAsBase64(file);
       }
-    };
-    reader.readAsDataURL(file);
+
+      const nameField = `${fieldName}Name` as 'docDlFrontName' | 'docDlBackName' | 'docMedCertName';
+
+      setFormData(prev => ({ 
+        ...prev, 
+        [fieldName]: base64Result,
+        [nameField]: file.name
+      }));
+
+      if (errors[fieldName]) {
+        setErrors(prev => {
+          const next = { ...prev };
+          delete next[fieldName];
+          return next;
+        });
+      }
+      triggerToast(`${file.name} uploaded successfully!`, "success");
+    } catch (err) {
+      console.error(err);
+      triggerToast("Failed to process file.", "error");
+    }
   };
+
 
   const renderDocumentUploadCard = (
     fieldName: 'docDlFront' | 'docDlBack' | 'docMedCert',
@@ -438,6 +577,8 @@ export default function ApplyPage() {
   ) => {
     const fileValue = formData[fieldName];
     const isPdf = fileValue && fileValue.startsWith("data:application/pdf");
+    const nameField = `${fieldName}Name` as 'docDlFrontName' | 'docDlBackName' | 'docMedCertName';
+    const fileName = formData[nameField];
 
     return (
       <div className="space-y-2">
@@ -449,7 +590,7 @@ export default function ApplyPage() {
               <div className="flex flex-col items-center space-y-2 p-3 bg-brand-dark/70 rounded-lg w-full max-w-xs border border-brand-border/60">
                 <FileText className="h-10 w-10 text-red-500/90 drop-shadow" />
                 <span className="text-xs font-bold text-slate-300 text-center truncate w-full font-sans">
-                  PDF Document Loaded
+                  {fileName || "PDF Document Loaded"}
                 </span>
                 <button
                   type="button"
@@ -469,6 +610,11 @@ export default function ApplyPage() {
                   alt={`${label} Preview`}
                   className="max-h-36 object-contain rounded"
                 />
+                {fileName && (
+                  <span className="text-[10px] text-slate-400 text-center truncate w-full px-2">
+                    {fileName}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => {
@@ -487,7 +633,7 @@ export default function ApplyPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setFormData(prev => ({ ...prev, [fieldName]: "" }));
+                  setFormData(prev => ({ ...prev, [fieldName]: "", [nameField]: "" }));
                   triggerToast(`${label.replace(" *", "")} removed`, "info");
                 }}
                 className="px-4 py-2 bg-red-950/40 hover:bg-red-950/80 text-red-400 hover:text-red-300 text-xs font-bold border border-red-500/30 hover:border-red-500/60 rounded-lg flex items-center gap-1.5 transition-all shadow-sm"
@@ -501,14 +647,14 @@ export default function ApplyPage() {
           <div className="relative border border-dashed border-brand-border rounded-xl p-6 bg-brand-dark/50 hover:bg-brand-dark flex flex-col items-center justify-center cursor-pointer transition">
             <input
               type="file"
-              accept=".pdf, .jpg, .jpeg, .png"
+              accept=".pdf, .jpg, .jpeg, .png, .webp"
               onChange={(e) => handleFileUpload(e, fieldName)}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
             <div className="text-center space-y-2 text-slate-500">
               <Upload className="h-6 w-6 mx-auto text-gold/65" />
               <p className="text-xs font-bold text-slate-300">{placeholderText}</p>
-              <p className="text-[10px]">JPG, PNG, or PDF - Max 10 MB</p>
+              <p className="text-[10px]">JPG, PNG, WebP or PDF - Max 10 MB</p>
             </div>
           </div>
         )}
@@ -518,7 +664,6 @@ export default function ApplyPage() {
     );
   };
 
-  // Dynamic Employer handlers
   const addEmployer = () => {
     if (!employerForm.employer.trim()) {
       setEmployerFormError("Employer name is required");
@@ -621,7 +766,19 @@ export default function ApplyPage() {
         newErrors.drugTestDoc = "Documentation receipt declaration is required if you answered Yes";
       }
     } else if (step === 9) {
-      if (!formData.ssn.trim()) newErrors.ssn = "Social security number is required";
+      if ((formData.taxIdType || "SSN") === "SSN") {
+        if (!formData.ssn.trim()) {
+          newErrors.ssn = "Social security number is required";
+        } else if (!/^\d{3}-\d{2}-\d{4}$/.test(formData.ssn) && !/^\d{9}$/.test(formData.ssn)) {
+          newErrors.ssn = "Invalid SSN format (use XXX-XX-XXXX or 9 digits)";
+        }
+      } else {
+        if (!formData.ein.trim()) {
+          newErrors.ein = "Employer Identification Number (EIN) is required";
+        } else if (!/^\d{2}-\d{7}$/.test(formData.ein) && !/^\d{9}$/.test(formData.ein)) {
+          newErrors.ein = "Invalid EIN format (use XX-XXXXXXX or 9 digits)";
+        }
+      }
       if (!formData.signatureName.trim()) newErrors.signatureName = "Full legal name is required";
       if (!formData.signatureData) newErrors.signatureData = "Drawn signature is required";
     }
@@ -1816,29 +1973,76 @@ export default function ApplyPage() {
                       <strong>Certification:</strong> I certify that all information provided in this application is true, correct, and complete to the best of my knowledge. I understand that: providing false or misleading information may result in disqualification or termination; the motor carrier will conduct independent verification as required by FMCSA; approximate information is acceptable when exact details are unavailable. I authorize all investigations and release of information described in this application.
                     </div>
 
-                    {/* SSN Input */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-400 block">Social Security Number *</label>
-                      <div className="relative max-w-sm">
-                        <input
-                          type={showSSN ? "text" : "password"}
-                          name="ssn"
-                          value={formData.ssn}
-                          onChange={handleTextChange}
-                          className="w-full rounded-lg border border-brand-border bg-brand-dark px-4 py-3 text-sm text-slate-200 focus:border-gold focus:outline-none pr-10 font-mono tracking-widest"
-                          placeholder="XXX-XX-XXXX"
-                          maxLength={11}
-                        />
+                    {/* SSN / EIN Toggle Tab */}
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold text-slate-450 block">Tax Identification *</label>
+                      <div className="flex bg-brand-dark border border-brand-border rounded-lg p-1 max-w-sm">
                         <button
                           type="button"
-                          onClick={() => setShowSSN(!showSSN)}
-                          className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-350 transition"
+                          onClick={() => setFormData(prev => ({ ...prev, taxIdType: "SSN" }))}
+                          className={`flex-1 text-center py-2 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                            (formData.taxIdType || "SSN") === "SSN"
+                              ? "bg-gold text-brand-dark shadow"
+                              : "text-slate-400 hover:text-slate-200"
+                          }`}
                         >
-                          {showSSN ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          Social Security Number (SSN)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, taxIdType: "EIN" }))}
+                          className={`flex-1 text-center py-2 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                            (formData.taxIdType || "SSN") === "EIN"
+                              ? "bg-gold text-brand-dark shadow"
+                              : "text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          EIN / Tax ID
                         </button>
                       </div>
-                      <p className="text-[10px] text-slate-500">Required by FMCSA per 49 CFR § 391.21. Your SSN is encrypted and stored securely.</p>
-                      {errors.ssn && <p className="text-xs text-red-500 font-bold">{errors.ssn}</p>}
+
+                      {(formData.taxIdType || "SSN") === "SSN" ? (
+                        /* SSN Input */
+                        <div className="space-y-1">
+                          <div className="relative max-w-sm">
+                            <input
+                              type={showSSN ? "text" : "password"}
+                              name="ssn"
+                              value={formData.ssn || ""}
+                              onChange={handleSSNChange}
+                              className="w-full rounded-lg border border-brand-border bg-brand-dark px-4 py-3 text-sm text-slate-200 focus:border-gold focus:outline-none pr-10 font-mono tracking-widest"
+                              placeholder="XXX-XX-XXXX"
+                              maxLength={11}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowSSN(!showSSN)}
+                              className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-350 transition cursor-pointer"
+                            >
+                              {showSSN ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
+                          <p className="text-[10px] text-slate-500">Required by FMCSA per 49 CFR § 391.21. Your SSN is encrypted and stored securely.</p>
+                          {errors.ssn && <p className="text-xs text-red-500 font-bold">{errors.ssn}</p>}
+                        </div>
+                      ) : (
+                        /* EIN Input */
+                        <div className="space-y-1">
+                          <div className="relative max-w-sm">
+                            <input
+                              type="text"
+                              name="ein"
+                              value={formData.ein || ""}
+                              onChange={handleEINChange}
+                              className="w-full rounded-lg border border-brand-border bg-brand-dark px-4 py-3 text-sm text-slate-200 focus:border-gold focus:outline-none pr-10 font-mono tracking-widest"
+                              placeholder="XX-XXXXXXX"
+                              maxLength={10}
+                            />
+                          </div>
+                          <p className="text-[10px] text-slate-500">Employer Identification Number (EIN) for business entities.</p>
+                          {errors.ein && <p className="text-xs text-red-500 font-bold">{errors.ein}</p>}
+                        </div>
+                      )}
                     </div>
 
                     {/* Typed name */}

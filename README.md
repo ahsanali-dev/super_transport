@@ -14,17 +14,17 @@ A structured multi-step stepper qualification form designed to comply with FMCSA
 *   **Experience:** OTR experience durations and operated trailer configuration tags.
 *   **Accidents & Citations:** 3-year recordable safety violation logs.
 *   **Drug & Alcohol:** Return-to-Duty / SAP process status checks.
-*   **Document Uploads:** Drag-and-drop slots for **Front of DL**, **Back of DL**, and **Medical Certificate**. File sizes are validated (up to 10 MB). Displays responsive image thumbnails and PDF badge previews with a custom **Inline Lightbox Modal** viewer and a **Remove File** control.
+*   **Document Uploads & Compression:** Drag-and-drop slots for **Front of DL**, **Back of DL**, and **Medical Certificate**. All uploaded images are **automatically compressed and converted to WebP format** on the client side before upload to optimize storage space and page performance. Displays responsive image thumbnails and PDF badge previews with a custom **Inline Lightbox Modal** viewer and a **Remove File** control.
 *   **Disclosures & Consent:** Terms (FCRA, PSP, Clearinghouse, Company Testing Policy) with individual checkbox signatures.
-*   **Signature:** SSN input (equipped with a secure password hide/reveal toggle), typed legal signature name, custom drawn canvas signature pad (with scaled coordinates mapping), and a read-only date stamp.
+*   **Signature (SSN / EIN Choice):** Features a segmented toggle tab allowing applicants to submit either their **Social Security Number (SSN)** or **Employer Identification Number (EIN)**. Both fields include dynamic input masking/formatting on the fly (adding dashes like `XXX-XX-XXXX` and `XX-XXXXXXX` as the user types), typed signature validation, and a custom drawn canvas signature pad.
 
 ### 2. Admin Dashboard (`/admin`)
 A central administrative management panel for safety and compliance operations:
 *   **Vetting Controls:** Action panel featuring buttons to **Mark Reviewed**, **Approve**, or **Reject** driver applications.
 *   **Status Loading Indicators:** Buttons dynamically hide and render a spinning progress indicator (`"Updating status & sending email..."`) to prevent double clicks during processing.
 *   **Credentials Inspection:** Full breakdown of the applicant's CDL, dynamic 10-year job history cards, and background consent.
-*   **Secure SSN Decryption:** SSN values are masked by default (`***-**-XXXX`) and feature a toggle switch to inspect the raw value securely.
-*   **File Previews:** Direct grids displaying DL fronts, DL backs, and Medical Certificates (image rendering or PDF embeds).
+*   **Secure SSN/EIN Decryption:** Dynamically displays either SSN or EIN matching the applicant's choice. Values are masked by default (`***-**-XXXX` / `**-*******`) and feature a secure eye toggle switch to reveal the raw value.
+*   **File Previews & Direct Download:** Direct grids displaying DL fronts, DL backs, and Medical Certificates (image rendering or PDF embeds). Features an **integrated direct Download icon button** for both images and PDFs. The system fetches the file as a blob to bypass cross-origin browser download restrictions, saving it locally with a descriptive name (e.g. `john-doe-front-of-driver's-license.webp`).
 
 ### 3. Automated SMTP Email Alerts
 Nodemailer integrations connecting safety and applicants:
@@ -60,8 +60,12 @@ Create a `.env` file in the root directory and configure the following parameter
 
 ```env
 # Database Connections (Supabase PostgreSQL)
-DATABASE_URL="postgresql://[USER]:[PASSWORD]@aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://[USER]:[PASSWORD]@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres"
+DATABASE_URL="postgresql://postgres.[PROJECT_ID]:[PASSWORD]@aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.[PROJECT_ID]:[PASSWORD]@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres"
+
+# Supabase Storage / Client Configuration
+NEXT_PUBLIC_SUPABASE_URL="https://[PROJECT_ID].supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 
 # Admin Dashboard Credentials
 ADMIN_USERNAME="admin"
