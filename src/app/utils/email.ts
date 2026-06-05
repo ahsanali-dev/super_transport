@@ -305,21 +305,38 @@ export async function sendApplicationEmails(app: ApplicationMailDetails) {
   `;
 
   try {
-    // Send to Driver
-    await transporter.sendMail({
-      from,
-      to: app.email,
-      subject: 'MARSHALL TRANSPORTS LLC | Onboarding Application Confirmed',
-      html: applicantHtml,
-    });
+    const results = await Promise.allSettled([
+      // Send to Driver
+      transporter.sendMail({
+        from,
+        to: app.email,
+        subject: 'MARSHALL TRANSPORTS LLC | Onboarding Application Confirmed',
+        html: applicantHtml,
+      }),
+      // Send to Admin
+      transporter.sendMail({
+        from,
+        to: adminEmail,
+        subject: `[New Driver App] ${fullName} - Class A (${app.cdlState})`,
+        html: adminHtml,
+      })
+    ]);
 
-    // Send to Admin
-    await transporter.sendMail({
-      from,
-      to: adminEmail,
-      subject: `[New Driver App] ${fullName} - Class A (${app.cdlState})`,
-      html: adminHtml,
-    });
+    const driverEmailResult = results[0];
+    const adminEmailResult = results[1];
+
+    if (driverEmailResult.status === 'rejected') {
+      console.error('Failed to send email to applicant:', driverEmailResult.reason);
+    }
+    if (adminEmailResult.status === 'rejected') {
+      console.error('Failed to send email to admin:', adminEmailResult.reason);
+    }
+
+    const success = driverEmailResult.status === 'fulfilled' || adminEmailResult.status === 'fulfilled';
+    if (!success) {
+      const errMessage = `Driver error: ${driverEmailResult.status === 'rejected' ? driverEmailResult.reason?.message : 'none'}, Admin error: ${adminEmailResult.status === 'rejected' ? adminEmailResult.reason?.message : 'none'}`;
+      return { success: false, error: errMessage };
+    }
 
     return { success: true };
   } catch (err: any) {
