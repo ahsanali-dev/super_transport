@@ -623,17 +623,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-6">
-                <div className="flex gap-4 items-start">
-                  <div className="rounded-lg bg-gold/10 p-2.5 text-gold shrink-0">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-slate-200">Business Location</h5>
-                    <p className="text-sm text-slate-400">1114 Granger st union city, tn 38261</p>
-                    <p className="text-[10px] text-slate-600 mt-1 font-mono">GPS: 36.4242° N, 89.0567° W</p>
-                  </div>
-                </div>
-
+                
                 <div className="flex gap-4 items-start">
                   <div className="rounded-lg bg-gold/10 p-2.5 text-gold shrink-0">
                     <Phone className="h-5 w-5" />
