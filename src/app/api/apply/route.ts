@@ -162,67 +162,69 @@ export async function POST(request: Request) {
       },
     });
 
-    // Send emails in the background
-    sendApplicationEmails({
-      firstName:    body.firstName,
-      lastName:     body.lastName,
-      email:        body.email,
-      phone:        body.phone,
-      dob:          body.dob,
-      addressStreet: body.addressStreet,
-      addressLine2:  body.addressLine2,
-      addressCity:   body.addressCity,
-      addressState:  body.addressState,
-      addressZip:    body.addressZip,
-      addressDuration: body.addressDuration,
+    // Send emails (awaited to prevent early termination in serverless environments)
+    try {
+      await sendApplicationEmails({
+        firstName:    body.firstName,
+        lastName:     body.lastName,
+        email:        body.email,
+        phone:        body.phone,
+        dob:          body.dob,
+        addressStreet: body.addressStreet,
+        addressLine2:  body.addressLine2,
+        addressCity:   body.addressCity,
+        addressState:  body.addressState,
+        addressZip:    body.addressZip,
+        addressDuration: body.addressDuration,
 
-      prevAddressStreet: body.hasPrevAddress ? body.prevAddressStreet : undefined,
-      prevAddressLine2:  body.hasPrevAddress ? body.prevAddressLine2  : undefined,
-      prevAddressCity:   body.hasPrevAddress ? body.prevAddressCity   : undefined,
-      prevAddressState:  body.hasPrevAddress ? body.prevAddressState  : undefined,
-      prevAddressZip:    body.hasPrevAddress ? body.prevAddressZip    : undefined,
+        prevAddressStreet: body.hasPrevAddress ? body.prevAddressStreet : undefined,
+        prevAddressLine2:  body.hasPrevAddress ? body.prevAddressLine2  : undefined,
+        prevAddressCity:   body.hasPrevAddress ? body.prevAddressCity   : undefined,
+        prevAddressState:  body.hasPrevAddress ? body.prevAddressState  : undefined,
+        prevAddressZip:    body.hasPrevAddress ? body.prevAddressZip    : undefined,
 
-      cdlNumber:    body.cdlNumber,
-      cdlState:     body.cdlState,
-      cdlClass:     body.cdlClass,
-      cdlExpiration: body.cdlExpiration,
-      endorsements:  Array.isArray(body.endorsements) ? body.endorsements : [],
-      cdlTenYears:  !!body.cdlTenYears,
-      referral:     body.referral,
+        cdlNumber:    body.cdlNumber,
+        cdlState:     body.cdlState,
+        cdlClass:     body.cdlClass,
+        cdlExpiration: body.cdlExpiration,
+        endorsements:  Array.isArray(body.endorsements) ? body.endorsements : [],
+        cdlTenYears:  !!body.cdlTenYears,
+        referral:     body.referral,
 
-      employmentHistory: Array.isArray(body.employmentHistory) ? body.employmentHistory : [],
-      employmentGaps:    !!body.employmentGaps,
-      gapsDetail:        body.gapsDetail,
+        employmentHistory: Array.isArray(body.employmentHistory) ? body.employmentHistory : [],
+        employmentGaps:    !!body.employmentGaps,
+        gapsDetail:        body.gapsDetail,
 
-      yearsExperience:   body.yearsExperience,
-      equipmentOperated: Array.isArray(body.equipmentOperated) ? body.equipmentOperated : [],
+        yearsExperience:   body.yearsExperience,
+        equipmentOperated: Array.isArray(body.equipmentOperated) ? body.equipmentOperated : [],
 
-      hasAccidents:     !!body.hasAccidents,
-      accidentsDetail:   body.accidentsDetail,
-      hasViolations:    !!body.hasViolations,
-      violationsDetail:  body.violationsDetail,
+        hasAccidents:     !!body.hasAccidents,
+        accidentsDetail:   body.accidentsDetail,
+        hasViolations:    !!body.hasViolations,
+        violationsDetail:  body.violationsDetail,
 
-      sapStatus: !!body.sapStatus,
+        sapStatus: !!body.sapStatus,
 
-      docDlFrontUploaded:  !!docDlFrontUrl,
-      docDlBackUploaded:   !!docDlBackUrl,
-      docMedCertUploaded:  !!docMedCertUrl,
+        docDlFrontUploaded:  !!docDlFrontUrl,
+        docDlBackUploaded:   !!docDlBackUrl,
+        docMedCertUploaded:  !!docMedCertUrl,
 
-      fcraConsent:          !!body.fcraConsent,
-      pspConsent:           !!body.pspConsent,
-      clearinghouseConsent: !!body.clearinghouseConsent,
-      drugTestPositive:     !!body.drugTestPositive,
-      drugTestDoc:          !!body.drugTestDoc,
-      companyPolicyConsent: !!body.companyPolicyConsent,
+        fcraConsent:          !!body.fcraConsent,
+        pspConsent:           !!body.pspConsent,
+        clearinghouseConsent: !!body.clearinghouseConsent,
+        drugTestPositive:     !!body.drugTestPositive,
+        drugTestDoc:          !!body.drugTestDoc,
+        companyPolicyConsent: !!body.companyPolicyConsent,
 
-      taxIdType:     body.taxIdType || "SSN",
-      ssnMasked:     (body.taxIdType || "SSN") === "SSN" && body.ssn ? `***-**-${body.ssn.slice(-4)}` : undefined,
-      einMasked:     (body.taxIdType || "SSN") === "EIN" && body.ein ? `**-***${body.ein.slice(-4)}` : undefined,
-      signatureName: body.signatureName,
-      signatureData: signatureUrl || body.signatureData,
-    }).catch((err) => {
-      console.error("Failed to send submission notification emails asynchronously:", err);
-    });
+        taxIdType:     body.taxIdType || "SSN",
+        ssnMasked:     (body.taxIdType || "SSN") === "SSN" && body.ssn ? `***-**-${body.ssn.slice(-4)}` : undefined,
+        einMasked:     (body.taxIdType || "SSN") === "EIN" && body.ein ? `**-***${body.ein.slice(-4)}` : undefined,
+        signatureName: body.signatureName,
+        signatureData: signatureUrl || body.signatureData,
+      });
+    } catch (err) {
+      console.error("Failed to send submission notification emails:", err);
+    }
 
     return NextResponse.json({ success: true, id: newApp.id });
   } catch (error: any) {
